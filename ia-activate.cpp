@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A mARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
@@ -30,6 +30,7 @@ static DefaultGUIModel::variable_t vars[] =
 {
 	{ "Vin", "", DefaultGUIModel::INPUT, },
 	{ "Iout", "", DefaultGUIModel::OUTPUT, },
+	{ "Output_to_mV", "", DefaultGUIModel::OUTPUT, },
 	{ "Period (s)", "Duration of one cycle", DefaultGUIModel::PARAMETER
 		| DefaultGUIModel::DOUBLE, },
 	{ "Delay (s)", "Time until step starts from beginning of cycle",
@@ -48,7 +49,7 @@ static DefaultGUIModel::variable_t vars[] =
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
 	{ "Depolarization Time (s)", "Time current is at depolarized value",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-	{ "Offset (pA)", "DC offset to add", DefaultGUIModel::PARAMETER
+	{ "Offset (mA)", "DC offset to add", DefaultGUIModel::PARAMETER
 		| DefaultGUIModel::DOUBLE, }, 
 };
 
@@ -97,7 +98,9 @@ void IAact::execute(void) {
 			step = 0;
 		}
 	}
+	Output_to_mV = Iout * .5e-3;
 	output(0) = Iout * 1e-12;
+	output(1) = Output_to_mV;
 }
 
 void IAact::update(DefaultGUIModel::update_flags_t flag) {
@@ -112,7 +115,7 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 			setParameter("Duty Cycle (%)", duty);
 			setParameter("Fixed Depolarization (pA)", fixedDepol);
 			setParameter("Depolarization Time (s)", depolTime);
-			setParameter("Offset (pA)", offset);
+			setParameter("Offset (mA)", offset);
 			break;
 
 		case MODIFY:
@@ -125,7 +128,7 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 			duty = getParameter("Duty Cycle (%)").toDouble();
 			fixedDepol = getParameter("Fixed Depolarization (pA)").toDouble();
 			depolTime = getParameter("Depolarization Time (s)").toDouble();
-			offset = getParameter("Offset (pA)").toDouble();
+			offset = getParameter("Offset (mA)").toDouble();
 			break;
 
 		case PAUSE:
@@ -147,8 +150,8 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 	
 	if (Amin > Amax) {
 		Amax = Amin;
-		setParameter("Min Amp (pA)", Amin);
-		setParameter("Max Amp (pA)", Amax);
+		setParameter("Min Amp (mA)", Amin);
+		setParameter("Max Amp (mA)", Amax);
 	}
 	
 	if (Ncycles < 1) {
@@ -171,7 +174,7 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 		setParameter("Delay (sec)", delay);
 	}
 	
-	//Define deltaI based on params
+	//Define deltaI based on mArams
 	if (Nsteps > 1) {
 		deltaI = (Amax - Amin) / (Nsteps - 1);
 	}

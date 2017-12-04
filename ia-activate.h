@@ -37,7 +37,7 @@ class IAact : public DefaultGUIModel {
 	
 	private:
 		#define EPS 1e-9
-		double V, Iout;
+		double V, Iout, Output_to_mV;
 
 		double dt;
 		double period;
