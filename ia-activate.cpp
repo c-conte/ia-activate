@@ -35,9 +35,9 @@ static DefaultGUIModel::variable_t vars[] =
 		| DefaultGUIModel::DOUBLE, },
 	{ "Delay (s)", "Time until step starts from beginning of cycle",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-	{ "Min Amp (pA)", "Starting current of the steps",
+	{ "Current Range Start (pA)", "Starting current of the steps",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-	{ "Max Amp (pA)", "Ending current of the steps", DefaultGUIModel::PARAMETER
+	{ "Current Range End (pA)", "Ending current of the steps", DefaultGUIModel::PARAMETER
 		| DefaultGUIModel::DOUBLE, },
 	{ "Increments", "How many steps to take between min and max",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::UINTEGER, },
@@ -45,7 +45,7 @@ static DefaultGUIModel::variable_t vars[] =
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::UINTEGER, },
 	{ "Duty Cycle (%)", "On time of the step during a single cycle",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
-	{ "Fixed Depolarization (pA)", "Value of the depolarization current",
+	{ "Max Amplitude (pA)", "Value of the maximum amplitude",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
 	{ "Depolarization Time (s)", "Time current is at depolarized value",
 		DefaultGUIModel::PARAMETER | DefaultGUIModel::DOUBLE, },
@@ -55,8 +55,8 @@ static DefaultGUIModel::variable_t vars[] =
 
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
-IAact::IAact(void) : DefaultGUIModel("IA Activation", ::vars, ::num_vars), dt(RT::System::getInstance()->getPeriod() * 1e-6), period(1.0), delay(0.0), Amin(-210.0), Amax(0.0), Nsteps(8), Ncycles(1), duty(15), fixedDepol(150), depolTime(1.0), offset(0.0) {
-	setWhatsThis("<p><b>I-Step:</b><br>This module generates a train of current injection pulses with amplitudes between a user-specified minimum and maximum.</p>");
+IAact::IAact(void) : DefaultGUIModel("IA Activation", ::vars, ::num_vars), dt(RT::System::getInstance()->getPeriod() * 1e-6), period(1.0), delay(0.0), rStart(-210.0), rEnd(0.0), Nsteps(8), Ncycles(1), duty(15), maxAmp(150), depolTime(1.0), offset(0.0) {
+	setWhatsThis("<p><b>I-Step:</b><br>This module generates a series of currents in a designated range followed by a fixed maximum current.</p>");
 	createGUI(vars, num_vars);
 	update(INIT);
 	refresh();
@@ -74,11 +74,11 @@ void IAact::execute(void) {
 		//Do all time keeping in seconds.
 		if (step < Nsteps) {
 			if (age >= delay && age < delay + period * (duty / 100) - EPS) {
-				Iout = Iout + Amin + step * deltaI;
+				Iout = Iout + rStart + step * deltaI;
 				age += dt / 1000;
 			}
 			else if(interage<depolTime) {
-				Iout = fixedDepol;
+				Iout = maxAmp;
 				interage += dt / 1000;
 			}
 			
@@ -108,12 +108,12 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 		case INIT:
 			setParameter("Period (s)", period);
 			setParameter("Delay (s)", delay);
-			setParameter("Min Amp (pA)", Amin);
-			setParameter("Max Amp (pA)", Amax);
+			setParameter("Current Range Start (pA)", rStart);
+			setParameter("Current Range End (pA)", rEnd);
 			setParameter("Increments", Nsteps);
 			setParameter("Cycles (#)", Ncycles);
 			setParameter("Duty Cycle (%)", duty);
-			setParameter("Fixed Depolarization (pA)", fixedDepol);
+			setParameter("Max Amplitude (pA)", maxAmp);
 			setParameter("Depolarization Time (s)", depolTime);
 			setParameter("Offset (mA)", offset);
 			break;
@@ -121,12 +121,12 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 		case MODIFY:
 			period = getParameter("Period (s)").toDouble();
 			delay = getParameter("Delay (s)").toDouble();
-			Amin = getParameter("Min Amp (pA)").toDouble();
-			Amax = getParameter("Max Amp (pA)").toDouble();
+			rStart = getParameter("Current Range Start (pA)").toDouble();
+			rEnd = getParameter("Current Range End (pA)").toDouble();
 			Nsteps = getParameter("Increments").toInt();
 			Ncycles = getParameter("Cycles (#)").toInt();
 			duty = getParameter("Duty Cycle (%)").toDouble();
-			fixedDepol = getParameter("Fixed Depolarization (pA)").toDouble();
+			maxAmp = getParameter("Max Amplitude (pA)").toDouble();
 			depolTime = getParameter("Depolarization Time (s)").toDouble();
 			offset = getParameter("Offset (mA)").toDouble();
 			break;
@@ -148,10 +148,10 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 		setParameter("Period (sec)", period);
 	}
 	
-	if (Amin > Amax) {
-		Amax = Amin;
-		setParameter("Min Amp (mA)", Amin);
-		setParameter("Max Amp (mA)", Amax);
+	if (rStart > rEnd) {
+		rEnd = rStart;
+		setParameter("Min Amp (mA)", rStart);
+		setParameter("Max Amp (mA)", rEnd);
 	}
 	
 	if (Ncycles < 1) {
@@ -176,7 +176,7 @@ void IAact::update(DefaultGUIModel::update_flags_t flag) {
 	
 	//Define deltaI based on mArams
 	if (Nsteps > 1) {
-		deltaI = (Amax - Amin) / (Nsteps - 1);
+		deltaI = (rEnd - rStart) / (Nsteps - 1);
 	}
 	else {
 		deltaI = 0;

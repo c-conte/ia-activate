@@ -42,12 +42,12 @@ class IAact : public DefaultGUIModel {
 		double dt;
 		double period;
 		double delay;
-		double Amin, Amax;
+		double rStart, rEnd;
 		int Nsteps;
 		int Ncycles;
 		int cycle;
 		double duty;
-		double fixedDepol;
+		double maxAmp;
 		double depolTime;
 		double offset;
 	
