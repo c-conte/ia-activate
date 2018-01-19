@@ -55,7 +55,7 @@ static DefaultGUIModel::variable_t vars[] =
 
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
-IAact::IAact(void) : DefaultGUIModel("IA Activation", ::vars, ::num_vars), dt(RT::System::getInstance()->getPeriod() * 1e-6), period(1.0), delay(0.0), rStart(0), rEnd(-210.0), Nsteps(8), Ncycles(1), duty(15), maxAmp(150), depolTime(1.0), offset(0.0) {
+IAact::IAact(void) : DefaultGUIModel("IA Activation", ::vars, ::num_vars), dt(RT::System::getInstance()->getPeriod() * 1e-6), period(1.0), delay(0.0), rStart(0), rEnd(-21.0), Nsteps(8), Ncycles(1), duty(15), maxAmp(15.0), depolTime(1.0), offset(0.0) {
 	setWhatsThis("<p><b>I-Step:</b><br>This module generates a series of currents in a designated range followed by a fixed maximum current.</p>");
 	createGUI(vars, num_vars);
 	update(INIT);
