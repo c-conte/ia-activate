@@ -1,8 +1,8 @@
-PLUGIN_NAME = ia-activate
+PLUGIN_NAME = MRT
 
-HEADERS = ia-activate.h
+HEADERS = MRT.h
 
-SOURCES = ia-activate.cpp \
+SOURCES = MRT.cpp \
 
 LIBS = 
 
