@@ -29,8 +29,7 @@ extern "C" Plugin::Object *createRTXIPlugin(void) {
 static DefaultGUIModel::variable_t vars[] =
 {
 	{ "Vin", "", DefaultGUIModel::INPUT, },
-	{ "Output_to_Acurrent_Mod", "", DefaultGUIModel::OUTPUT, },
-	{ "Output_to_mV", "", DefaultGUIModel::OUTPUT, },
+	{ "Output_To_OTA", "", DefaultGUIModel::OUTPUT, },
 	{ "Period (s)", "Duration of one cycle", DefaultGUIModel::PARAMETER
 		| DefaultGUIModel::DOUBLE, },
 	{ "Delay (s)", "Time until step starts from beginning of cycle",
@@ -55,7 +54,7 @@ static DefaultGUIModel::variable_t vars[] =
 
 static size_t num_vars = sizeof(vars) / sizeof(DefaultGUIModel::variable_t);
 
-IAact::IAact(void) : DefaultGUIModel("IA Activation", ::vars, ::num_vars), dt(RT::System::getInstance()->getPeriod() * 1e-6), period(1.0), delay(0.0), rStart(0), rEnd(-21.0), Nsteps(8), Ncycles(1), duty(15), maxAmp(15.0), depolTime(1.0), offset(0.0) {
+IAact::IAact(void) : DefaultGUIModel("IA Activation", ::vars, ::num_vars), dt(RT::System::getInstance()->getPeriod() * 1e-6), period(1.0), delay(0.0), rStart(0), rEnd(-210.0), Nsteps(8), Ncycles(1), duty(15), maxAmp(15.0), depolTime(1.0), offset(0.0) {
 	setWhatsThis("<p><b>I-Step:</b><br>This module generates a series of currents in a designated range followed by a fixed maximum current.</p>");
 	createGUI(vars, num_vars);
 	update(INIT);
@@ -99,8 +98,7 @@ void IAact::execute(void) {
 		}
 	}
 	Output_to_mV = Iout * .5e-3;
-	output(0) = Iout;
-	output(1) = Output_to_mV;
+	output(0) = Output_to_mV;
 }
 
 void IAact::update(DefaultGUIModel::update_flags_t flag) {
