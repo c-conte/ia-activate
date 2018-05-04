@@ -2,7 +2,7 @@ PLUGIN_NAME = ia-activate
 
 HEADERS = ia-activate.h
 
-SOURCES = ia-activate.cpp \
+SOURCES = ia-activate.cpp 
 
 LIBS = 
 
